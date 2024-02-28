@@ -1,0 +1,10 @@
+body {
+  background: black;
+}
+
+.game {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 75vh;
+}
