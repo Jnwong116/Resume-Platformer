@@ -23,7 +23,7 @@ const scaledCanvas = {
 const collisionBlocks = currentWorld.createCollisionBlocks();
 const platformBlocks = currentWorld.createPlatformBlocks();
 
-const GRAVITY = 0.2;
+const GRAVITY = 0.15;
 
 const p1 = new Player({
   position: {
@@ -250,7 +250,7 @@ window.addEventListener("keydown", (e) => {
       break;
 
     case "w":
-      p1.velocity.y = -5.5;
+      p1.velocity.y = -5;
       break;
     case "ArrowRight":
       keys.ArrowRight.pressed = true;
@@ -259,7 +259,7 @@ window.addEventListener("keydown", (e) => {
       keys.ArrowLeft.pressed = true;
       break;
     case "ArrowUp":
-      p2.velocity.y = -5.5;
+      p2.velocity.y = -5;
       break;
   }
 });
