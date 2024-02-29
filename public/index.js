@@ -1,5 +1,7 @@
 const log = console.log;
 
+const socket = io();
+
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
