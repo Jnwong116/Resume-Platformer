@@ -4,6 +4,7 @@ class Player extends Sprite {
     collisionBlocks,
     platformBlocks,
     imageSrc,
+    hitbox,
     framerate,
     scale = 0.3,
     animations,
@@ -24,8 +25,10 @@ class Player extends Sprite {
         x: this.position.x,
         y: this.position.y,
       },
-      width: 10,
-      height: 10,
+      width: hitbox.width,
+      height: hitbox.height,
+      xOffset: hitbox.position.x,
+      yOffset: hitbox.position.y,
     };
 
     this.animations = animations;
@@ -62,11 +65,20 @@ class Player extends Sprite {
     this.cameraBox.position.y = this.position.y - 10;
   }
 
-  panCameraHorizontal(canvas, camera) {
+  panCameraHorizontal(canvas, camera, oppPlayer) {
     const cameraBoxRight = this.cameraBox.position.x + this.cameraBox.width;
     const cameraBoxLeft = this.cameraBox.position.x;
 
-    if (cameraBoxRight >= 576 || cameraBoxLeft <= 0) return;
+    if (
+      cameraBoxRight >= 576 ||
+      cameraBoxLeft <= 0 ||
+      (oppPlayer.hitbox.position.x <= Math.abs(camera.position.x) &&
+        this.lastDirection == "right") ||
+      (oppPlayer.hitbox.position.x + oppPlayer.hitbox.width >=
+        canvas.width / 4 + Math.abs(camera.position.x) &&
+        this.lastDirection == "left")
+    )
+      return;
 
     if (
       cameraBoxRight >= canvas.width / 4 + Math.abs(camera.position.x) &&
@@ -83,7 +95,7 @@ class Player extends Sprite {
     }
   }
 
-  panCameraVertical(canvas, camera) {
+  panCameraVertical(canvas, camera, oppPlayer) {
     if (
       this.cameraBox.position.y + this.velocity.y <= 0 ||
       this.cameraBox.position.y + this.cameraBox.height + this.velocity.y >= 432
@@ -106,10 +118,16 @@ class Player extends Sprite {
     }
   }
 
-  checkForHorizontalCanvasCollision() {
+  checkForHorizontalCanvasCollision(oppPlayer) {
     if (
       this.hitbox.position.x + this.hitbox.width + this.velocity.x >= 576 ||
-      this.hitbox.position.x + this.velocity.x <= 0
+      this.hitbox.position.x + this.velocity.x <= 0 ||
+      (oppPlayer.hitbox.position.x <= Math.abs(camera.position.x) &&
+        this.hitbox.position.x + this.hitbox.width + this.velocity.x >=
+          canvas.width / 4 + Math.abs(camera.position.x)) ||
+      (oppPlayer.hitbox.position.x + oppPlayer.hitbox.width >=
+        canvas.width / 4 + Math.abs(camera.position.x) &&
+        this.hitbox.position.x + this.velocity.x <= Math.abs(camera.position.x))
     ) {
       this.velocity.x = 0;
     }
@@ -156,11 +174,13 @@ class Player extends Sprite {
   updateHitbox() {
     this.hitbox = {
       position: {
-        x: this.position.x + 15,
-        y: this.position.y + 15.5,
+        x: this.position.x + this.hitbox.xOffset,
+        y: this.position.y + this.hitbox.yOffset,
       },
-      width: 8,
-      height: 23,
+      width: this.hitbox.width,
+      height: this.hitbox.height,
+      xOffset: this.hitbox.xOffset,
+      yOffset: this.hitbox.yOffset,
     };
   }
 

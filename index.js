@@ -23,7 +23,7 @@ const scaledCanvas = {
 const collisionBlocks = currentWorld.createCollisionBlocks();
 const platformBlocks = currentWorld.createPlatformBlocks();
 
-const GRAVITY = 0.1;
+const GRAVITY = 0.2;
 
 const p1 = new Player({
   position: {
@@ -33,6 +33,14 @@ const p1 = new Player({
   collisionBlocks,
   platformBlocks,
   imageSrc: "./assets/jordan/Idle.png",
+  hitbox: {
+    position: {
+      x: 15,
+      y: 15.5,
+    },
+    width: 8,
+    height: 23,
+  },
   framerate: 6,
   animations: {
     Idle: {
@@ -70,12 +78,20 @@ const p1 = new Player({
 
 const p2 = new Player({
   position: {
-    x: 200,
+    x: 150,
     y: 300,
   },
   collisionBlocks,
   platformBlocks,
   imageSrc: "./assets/cicy/Idle.png",
+  hitbox: {
+    position: {
+      x: 15,
+      y: 17.5,
+    },
+    width: 8,
+    height: 21,
+  },
   framerate: 5,
   animations: {
     Idle: {
@@ -110,6 +126,8 @@ const p2 = new Player({
     },
   },
 });
+
+const players = [p1, p2];
 
 const background = currentWorld.background;
 
@@ -162,28 +180,32 @@ const animate = () => {
   collisionBlocks.forEach((block) => block.update());
   platformBlocks.forEach((block) => block.update());
 
-  p1.checkForHorizontalCanvasCollision();
-  p2.checkForHorizontalCanvasCollision();
-  p1.update();
-  p2.update();
+  players.forEach((player) => {
+    player.checkForHorizontalCanvasCollision(player === p1 ? p2 : p1);
+    player.update();
+    player.velocity.x = 0;
 
-  p1.velocity.x = 0;
-  p2.velocity.x = 0;
+    if (player.velocity.y !== 0) {
+      player.panCameraVertical(canvas, camera, player === p1 ? p2 : p1);
+      if (player.lastDirection === "right") player.switchSprite("Jump");
+      else player.switchSprite("JumpLeft");
+    }
+  });
 
   if (keys.d.pressed) {
-    p1.velocity.x = 1.25;
+    p1.velocity.x = 2.5;
     p1.lastDirection = "right";
-    p1.panCameraHorizontal(canvas, camera);
+    p1.panCameraHorizontal(canvas, camera, p2);
     if (p1.velocity.y !== 0) {
-      p1.panCameraVertical(canvas, camera);
+      p1.panCameraVertical(canvas, camera, p2);
       p1.switchSprite("Jump");
     } else p1.switchSprite("Run");
   } else if (keys.a.pressed) {
-    p1.velocity.x = -1.25;
+    p1.velocity.x = -2.5;
     p1.lastDirection = "left";
-    p1.panCameraHorizontal(canvas, camera);
+    p1.panCameraHorizontal(canvas, camera, p2);
     if (p1.velocity.y !== 0) {
-      p1.panCameraVertical(canvas, camera);
+      p1.panCameraVertical(canvas, camera, p2);
       p1.switchSprite("JumpLeft");
     } else p1.switchSprite("RunLeft");
   } else if (p1.velocity.y === 0) {
@@ -192,36 +214,24 @@ const animate = () => {
   }
 
   if (keys.ArrowRight.pressed) {
-    p2.velocity.x = 1.25;
+    p2.velocity.x = 2.5;
     p2.lastDirection = "right";
-    p2.panCameraHorizontal(canvas, camera);
+    p2.panCameraHorizontal(canvas, camera, p1);
     if (p2.velocity.y !== 0) {
-      p2.panCameraVertical(canvas, camera);
+      p2.panCameraVertical(canvas, camera, p1);
       p2.switchSprite("Jump");
     } else p2.switchSprite("Run");
   } else if (keys.ArrowLeft.pressed) {
-    p2.velocity.x = -1.25;
+    p2.velocity.x = -2.5;
     p2.lastDirection = "left";
-    p2.panCameraHorizontal(canvas, camera);
+    p2.panCameraHorizontal(canvas, camera, p1);
     if (p2.velocity.y !== 0) {
-      p2.panCameraVertical(canvas, camera);
+      p2.panCameraVertical(canvas, camera, p1);
       p2.switchSprite("JumpLeft");
     } else p2.switchSprite("RunLeft");
   } else if (p2.velocity.y === 0) {
     if (p2.lastDirection === "right") p2.switchSprite("Idle");
     else p2.switchSprite("IdleLeft");
-  }
-
-  if (p1.velocity.y !== 0) {
-    p1.panCameraVertical(canvas, camera);
-    if (p1.lastDirection === "right") p1.switchSprite("Jump");
-    else p1.switchSprite("JumpLeft");
-  }
-
-  if (p2.velocity.y !== 0) {
-    p2.panCameraVertical(canvas, camera);
-    if (p2.lastDirection === "right") p2.switchSprite("Jump");
-    else p2.switchSprite("JumpLeft");
   }
 
   c.restore();
@@ -240,7 +250,7 @@ window.addEventListener("keydown", (e) => {
       break;
 
     case "w":
-      p1.velocity.y = -4;
+      p1.velocity.y = -5.5;
       break;
     case "ArrowRight":
       keys.ArrowRight.pressed = true;
@@ -249,7 +259,7 @@ window.addEventListener("keydown", (e) => {
       keys.ArrowLeft.pressed = true;
       break;
     case "ArrowUp":
-      p2.velocity.y = -4;
+      p2.velocity.y = -5.5;
       break;
   }
 });
